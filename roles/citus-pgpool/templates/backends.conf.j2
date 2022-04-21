@@ -1,0 +1,8 @@
+{% for backend in backends %}
+backend_hostname{{ loop.index - 1 }} = '{{ backend }}'
+backend_port{{ loop.index - 1 }} = 5432
+backend_weight{{ loop.index - 1 }} = {{ loop.index }}
+backend_data_directory{{ loop.index - 1 }} = '/var/lib/pgsql/14/data'
+backend_flag{{ loop.index - 1 }} = 'ALLOW_TO_FAILOVER'
+
+{% endfor %}

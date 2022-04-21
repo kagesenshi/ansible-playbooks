@@ -1,0 +1,51 @@
+---
+# check and only allow RHEL8
+#
+# tasks file for citus-coordinator
+- name: install pgdg repository
+  dnf:
+    name: 'https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm'
+    state: present
+    disable_gpg_check: yes
+
+- name: install citus repository
+  get_url:
+    url: https://repos.citusdata.com/community/config_file.repo?os=RHEL&dist=8&source=script
+    dest: /etc/yum.repos.d/citusdata_community.repo
+
+- name: install epel
+  dnf:
+    name: epel-release
+    state: present
+
+- name: disable non-pgsql 14 repositories
+  ini_file: 
+    path: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ item }}"
+    option: enabled
+    value: 0
+    no_extra_spaces: yes
+  with_items:
+      - pgdg10
+      - pgdg11
+      - pgdg12
+      - pgdg13
+
+- name: disable distro postgresql package
+  ini_file: 
+    path: /etc/dnf/modules.d/postgresql.module
+    section: postgresql
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: yes
+  with_items:
+    - key: name
+      value: postgresql
+    - key: stream
+      value: ''
+    - key: profiles
+      value: ''
+    - key: state
+      value: disabled
+
+

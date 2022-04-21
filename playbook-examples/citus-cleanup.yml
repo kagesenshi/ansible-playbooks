@@ -1,0 +1,23 @@
+- hosts: all
+  tasks:
+    - name: stop pg_autoctl
+      systemd:
+        name: pg_autoctl
+        state: stopped
+
+    - name: delete pgdata
+      file:
+        path: /var/lib/pgsql/14/data/
+        state: absent
+
+    - name: delete pg_autoctl files
+      file:
+        path: /var/lib/pgsql/.local/share/pg_autoctl/
+        state: absent
+
+    - name: create pgdata
+      file:
+        path: /var/lib/pgsql/14/data/
+        state: directory
+      become: yes
+      become_user: postgres

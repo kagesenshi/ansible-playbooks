@@ -1,0 +1,26 @@
+- hosts: monitor
+  roles:
+    - citus-node
+    - role: citus-coordinator
+      vars:
+        is_monitor: true
+        trust_network: 10.210.14.0/24
+
+- hosts: db
+  serial: 1
+  roles:
+    - citus-node
+    - role: citus-coordinator
+      vars:
+        is_monitor: false
+        monitor_host: 10.210.14.43
+        trust_network: 10.210.14.0/24
+
+- hosts: pgpool
+  roles:
+    - citus-node
+    - role: citus-pgpool
+      vars:
+        backends:
+          - 10.210.14.44
+          - 10.210.14.45

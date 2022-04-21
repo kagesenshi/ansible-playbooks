@@ -1,0 +1,80 @@
+---
+# tasks file for citus-coordinator
+
+- name: install citus
+  dnf:
+    name: citus102_14
+
+- name: open pgsql port
+  firewalld:
+    port: 5432/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: install auto failover
+  dnf:
+    name: pg-auto-failover16_14
+    state: present
+
+- name: initdb (monitor)
+  command: /usr/pgsql-14/bin/pg_autoctl create monitor --auth trust --ssl-self-signed --pgdata /var/lib/pgsql/14/data/ --pgctl /usr/pgsql-14/bin/pg_ctl
+  args:
+    creates: /var/lib/pgsql/14/data/postgresql.conf
+  become: true
+  become_user: postgres
+  when: is_monitor == true
+
+- name: initdb (db node)
+  command: '/usr/pgsql-14/bin/pg_autoctl create postgres --auth trust --ssl-self-signed --hostname {{ ansible_default_ipv4.address }} --username ha-admin --dbname appdb --pgdata /var/lib/pgsql/14/data/ --pgctl /usr/pgsql-14/bin/pg_ctl --monitor "postgres://autoctl_node@{{ monitor_host }}:5432/pg_auto_failover?sslmode=require"'
+  args:
+    creates: /var/lib/pgsql/14/data/postgresql.conf
+  become: true
+  become_user: postgres
+  when: is_monitor == false
+
+- name: add citus library
+  lineinfile:
+    path: /var/lib/pgsql/14/data/postgresql.conf
+    regexp: "#shared_preload_libraries = ''"
+    line: "shared_preload_libraries = 'citus, pgautofailover'"
+
+
+- name: enable hot standby
+  lineinfile:
+    path: /var/lib/pgsql/14/data/postgresql.conf
+    regexp: "#hot_standby = on"
+    line: "hot_standby = on"
+
+- name: enable hot standby feedback
+  lineinfile:
+    path: /var/lib/pgsql/14/data/postgresql.conf
+    regexp: "#hot_standby_feedback = off"
+    line: "hot_standby_feedback = on"
+
+- name: update pg_hba.conf
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/14/data/pg_hba.conf
+    contype: host
+    users: all
+    source: "{{ trust_network }}"
+    databases: all
+    method: trust
+    create: true
+
+- name: create systemd service
+  shell: /usr/pgsql-14/bin/pg_autoctl show systemd > /etc/systemd/system/pg_autoctl.service
+  args:
+    creates: /etc/systemd/system/pg_autoctl.service
+  environment:
+    PGDATA: /var/lib/pgsql/14/data
+
+- name: reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: start pg_autoctl
+  systemd:
+    name: pg_autoctl
+    state: restarted
+    enabled: true

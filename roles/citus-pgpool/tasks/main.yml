@@ -1,0 +1,16 @@
+---
+# tasks file for citus-pgpool
+- name: install pgpool
+  dnf:
+    name: pgpool-II
+    state: present
+
+- name: copy config
+  template:
+    src: pgpool.conf.tmpl
+    dest: /etc/pgpool-II/pgpool.conf
+
+- name: copy config
+  template:
+    src: backends.conf.j2
+    dest: /etc/pgpool-II/backends.conf
