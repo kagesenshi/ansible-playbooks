@@ -1,0 +1,11 @@
+---
+# tasks file for airflow-node
+- name: enable izhar/data-engineering copr repository
+  command: dnf copr enable izhar/data-engineering -y
+  args: 
+    creates:  /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:izhar:data-engineering.repo
+
+- name: install airflow
+  dnf:
+    name: apache-airflow
+

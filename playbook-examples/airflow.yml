@@ -1,0 +1,45 @@
+- hosts: airflow_aio
+  roles:
+    - airflow-node
+    - role: redis
+      vars:
+        redis_password: pass
+    - role: airflow-config
+      vars:
+        airflow_config:
+          core:
+            sql_alchemy_conn: postgresql://user:pass@10.210.14.43:5432/airflow
+            executor: CeleryExecutor
+            fernet_key: 
+            donot_pickle: False
+            default_task_retries: 3
+            load_examples: False
+          cli:
+            endpoint_url: http://10.210.14.43:8080
+          webserver:
+            base_url: http://10.210.14.43:8080
+            default_ui_timezone: Asia/Kuala_Lumpur
+            dag_default_view: graph
+          smtp:
+            smtp_host: localhost
+            smtp_starttls: True
+            smtp_ssl: False
+            smtp_user: 
+            smtp_password: 
+            smtp_port: 25
+            smtp_mail_from: airflow@localhost.local
+          celery:
+            broker_url: redis://default:pass@10.210.14.43:6379/0
+            result_backend: db+postgresql://user:pass@10.210.14.43:5432/airflow_results
+
+  tasks:
+    - name: start and enable services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      with_items:
+        - apache-airflow-web
+        - apache-airflow-scheduler
+        - apache-airflow-worker
+

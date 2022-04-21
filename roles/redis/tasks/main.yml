@@ -1,0 +1,23 @@
+---
+# tasks file for redis
+- name: install redis
+  dnf:
+    name: redis
+
+- name: open redis port
+  firewalld:
+    port: 6379/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: upload configuration
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis.conf
+
+- name: start and enable redis
+  systemd:
+    name: redis
+    state: restarted
+    enabled: true

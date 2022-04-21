@@ -1,0 +1,7 @@
+- ini_file: 
+    path: /etc/apache-airflow/airflow.cfg
+    section: "{{ config_section }}"
+    option: "{{ item }}"
+    value: "{{ airflow_config[config_section][item] }}"
+    no_extra_spaces: yes
+  with_items: "{{ airflow_config[config_section] }}"

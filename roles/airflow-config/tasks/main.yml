@@ -1,0 +1,12 @@
+---
+# tasks file for airflow-config
+- name: upload config
+  copy:
+    src: airflow.cfg
+    dest: /etc/apache-airflow/airflow.cfg
+
+- name: update config
+  include: config_loop.yml obj={{ config_section }}
+  with_items: "{{ airflow_config }}"
+  loop_control:
+    loop_var: config_section
