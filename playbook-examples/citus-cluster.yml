@@ -14,9 +14,10 @@
       vars:
         is_monitor: false
         monitor_host: 10.210.14.43
-        trust_network: 10.210.14.0/24
+        trust_networks:
+          - 10.210.14.0/24
 
-- hosts: pgpool
+- hosts: balancer
   roles:
     - citus-node
     - role: citus-pgpool

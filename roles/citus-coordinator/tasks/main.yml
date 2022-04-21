@@ -57,10 +57,11 @@
     dest: /var/lib/pgsql/14/data/pg_hba.conf
     contype: host
     users: all
-    source: "{{ trust_network }}"
+    source: "{{ item }}"
     databases: all
     method: trust
     create: true
+  with_items: "{{ trust_networks }}"
 
 - name: create systemd service
   shell: /usr/pgsql-14/bin/pg_autoctl show systemd > /etc/systemd/system/pg_autoctl.service

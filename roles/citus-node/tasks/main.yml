@@ -31,6 +31,16 @@
       - pgdg12
       - pgdg13
 
+- name: enable pgsql 14 repositories
+  ini_file: 
+    path: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ item }}"
+    option: enabled
+    value: 1
+    no_extra_spaces: yes
+  with_items:
+      - pgdg14
+
 - name: disable distro postgresql package
   ini_file: 
     path: /etc/dnf/modules.d/postgresql.module
