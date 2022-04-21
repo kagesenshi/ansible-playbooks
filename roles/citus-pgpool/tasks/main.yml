@@ -2,7 +2,9 @@
 # tasks file for citus-pgpool
 - name: install pgpool
   dnf:
-    name: pgpool-II
+    name: 
+      - pgpool-II
+      - pgpool-II-pcp
     state: present
 
 - name: copy config
