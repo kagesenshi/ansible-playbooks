@@ -1,2 +1,7 @@
 ---
 # defaults file for citus-coordinator
+is_monitor: false
+pgpool_host: 127.0.0.1
+pgpool_port: 9999
+pgpool_pcp_port: 9898
+

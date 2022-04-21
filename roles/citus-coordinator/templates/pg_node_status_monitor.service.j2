@@ -1,0 +1,12 @@
+[Unit]
+Description=Reattach recovered node
+Wants=pg_node_status_monitor.timer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /var/lib/pgsql/pg_node_status_monitor.py -H {{ pgpool_host }} -p {{ pgpool_port }} -P {{ pgpool_pcp_port }}
+User=postgres
+Environment= 'PCPPASSFILE=/var/lib/pgsql/.pcppass'
+
+[Install]
+WantedBy=multi-user.target

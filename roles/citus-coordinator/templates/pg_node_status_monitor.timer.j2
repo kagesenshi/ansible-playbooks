@@ -1,0 +1,10 @@
+[Unit]
+Description=Reattach recovered node
+Requires=pg_node_status_monitor.service
+
+[Timer]
+Unit=pg_node_status_monitor.service
+OnCalendar=*:0/5
+
+[Install]
+WantedBy=timers.target

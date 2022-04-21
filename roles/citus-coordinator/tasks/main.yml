@@ -12,6 +12,9 @@
     state: enabled
     immediate: yes
 
+- debug:
+    msg: "{{ is_monitor }}"
+
 - name: install auto failover
   dnf:
     name: pg-auto-failover16_14
@@ -39,7 +42,6 @@
     regexp: "#shared_preload_libraries = ''"
     line: "shared_preload_libraries = 'citus, pgautofailover'"
 
-
 - name: enable hot standby
   lineinfile:
     path: /var/lib/pgsql/14/data/postgresql.conf
@@ -63,7 +65,40 @@
     create: true
   with_items: "{{ trust_networks }}"
 
-- name: create systemd service
+
+- name: install pgpool pcp
+  dnf:
+    name:
+      - pgpool-II-pcp
+    state: present
+  when: is_monitor == true
+
+- name: upload node reattach monitoring script
+  copy:
+    src: pg_node_status_monitor.py
+    dest: /var/lib/pgsql/pg_node_status_monitor.py
+
+- name: upload systemd service for node reattach
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.dest }}"
+  with_items:
+    - src: pg_node_status_monitor.service.j2
+      dest: pg_node_status_monitor.service
+    - src: pg_node_status_monitor.timer.j2
+      dest: pg_node_status_monitor.timer
+  when: is_monitor == true
+
+- name: create pcppass file
+  copy:
+    dest: /var/lib/pgsql/.pcppass
+    owner: postgres
+    group: postgres
+    mode: 0600
+    content: |
+      {{ pgpool_host }}:{{ pgpool_pcp_port }}:postgres:{{ pgpool_pcp_pass }}
+    
+- name: create pg_autoctl systemd service
   shell: /usr/pgsql-14/bin/pg_autoctl show systemd > /etc/systemd/system/pg_autoctl.service
   args:
     creates: /etc/systemd/system/pg_autoctl.service
@@ -79,3 +114,10 @@
     name: pg_autoctl
     state: restarted
     enabled: true
+
+- name: start node reattach service
+  systemd:
+    name: pg_node_status_monitor.timer
+    state: started
+    enabled: true
+  when: is_monitor == true

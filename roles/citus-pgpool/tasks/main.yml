@@ -12,7 +12,30 @@
     src: pgpool.conf.tmpl
     dest: /etc/pgpool-II/pgpool.conf
 
-- name: copy config
+- name: create backend config
   template:
     src: backends.conf.j2
     dest: /etc/pgpool-II/backends.conf
+
+- name: create pcp.conf
+  copy:
+    dest: /etc/pgpool-II/pcp.conf
+    content: |
+      postgres:{{ pgpool_pcp_pass | hash('md5') }}
+
+- name: open pgpool port
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+    - 9999/tcp
+    - 9898/tcp
+
+- name: start pgpool
+  systemd:
+    name: pgpool-II
+    state: restarted
+    enabled: true
+
