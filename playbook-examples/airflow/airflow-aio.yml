@@ -1,3 +1,5 @@
+# example configuration for airflow all-in-one server
+
 - hosts: airflow_aio
   roles:
     - airflow-node
