@@ -12,6 +12,13 @@
     state: enabled
     immediate: yes
 
+- name: open xinetd port
+  firewalld:
+    port: 23267/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
 - debug:
     msg: "{{ is_monitor }}"
 
@@ -64,15 +71,7 @@
     method: trust
     create: true
   with_items: "{{ trust_networks }}"
-
-
-- name: install pgpool pcp
-  dnf:
-    name:
-      - pgpool-II-pcp
-    state: present
-  when: is_monitor == true
-
+    
 - name: upload node reattach monitoring script
   copy:
     src: pg_node_status_monitor.py
@@ -89,15 +88,6 @@
       dest: pg_node_status_monitor.timer
   when: is_monitor == true
 
-- name: create pcppass file
-  copy:
-    dest: /var/lib/pgsql/.pcppass
-    owner: postgres
-    group: postgres
-    mode: 0600
-    content: |
-      {{ pgpool_host }}:{{ pgpool_pcp_port }}:postgres:{{ pgpool_pcp_pass }}
-    
 - name: create pg_autoctl systemd service
   shell: /usr/pgsql-14/bin/pg_autoctl show systemd > /etc/systemd/system/pg_autoctl.service
   args:

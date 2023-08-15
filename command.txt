@@ -1,0 +1,4 @@
+ansible-playbook -i inventory citus-cluster.yml
+psql -h 172.20.255.114 -p 5000 -d appdb -U postgres -c SELECT * FROM pg_extension WHERE extname = 'citus';
+
+psql -h 172.20.255.114 -p 5000 -d perf_test -U postgres -f performance_test.sql

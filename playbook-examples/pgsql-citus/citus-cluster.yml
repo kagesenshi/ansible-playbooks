@@ -1,30 +1,25 @@
 - hosts: monitor
+  remote_user: root
   roles:
     - citus-node
     - role: citus-coordinator
       vars:
         is_monitor: true
-        pgpool_host: 10.210.14.48
-        pgpool_pcp_pass: pgpool
+          #pgpool_host: 10.210.14.48
+          #pgpool_pcp_pass: pgpool
         trust_networks: 
-          - 10.210.14.0/24
+          - 172.20.255.0/24
+        pgnode1: "citus-node1 citus-node1.internal.lan"
+        pgnode2: "citus-node2 citus-node2.internal.lan"
+        pgnode3: "citus-node3 citus-node3.internal.lan"
 
 - hosts: db
+  remote_user: root
   serial: 1
   roles:
     - citus-node
     - role: citus-coordinator
       vars:
-        monitor_host: 10.210.14.43
+        monitor_host: 172.20.255.114
         trust_networks:
-          - 10.210.14.0/24
-
-- hosts: balancer
-  roles:
-    - citus-node
-    - role: citus-pgpool
-      vars:
-        backends:
-          - 10.210.14.44
-          - 10.210.14.45
-        pgpool_pcp_pass: pgpool
+          - 172.20.255.0/24
