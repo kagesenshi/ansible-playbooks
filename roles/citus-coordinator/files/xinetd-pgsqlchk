@@ -1,0 +1,15 @@
+# to place in /etc/xinetd.d/pgsqlchk
+service pgsqlchk
+{
+        flags           = REUSE
+        socket_type     = stream
+        port            = 23267
+        wait            = no
+        user            = nobody
+        server          = /opt/pgsqlcheck
+        log_on_failure  += USERID
+        disable         = no
+        only_from       = 0.0.0.0/0
+        per_source      = UNLIMITED
+}
+

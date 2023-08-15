@@ -26,10 +26,10 @@
     value: 0
     no_extra_spaces: yes
   with_items:
-      - pgdg10
       - pgdg11
       - pgdg12
       - pgdg13
+      - pgdg15
 
 - name: enable pgsql 14 repositories
   ini_file: 
